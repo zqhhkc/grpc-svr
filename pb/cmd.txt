@@ -1,0 +1,7 @@
+1、protoc 用法
+
+//生成 go 结构体
+protoc --go_out=. pb.proto
+
+//生成 grpc service 代码
+protoc --go-grpc_out=. ./pb/pb.proto

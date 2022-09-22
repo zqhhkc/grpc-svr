@@ -1,0 +1,136 @@
+syntax = "proto3";
+// import "google/protobuf/timestamp.proto";
+package pb;
+option go_package = "./pb";
+// IMMainServer Port im.fbcool.net:9009  imcore_service <-->immain_service
+service IMMainService{
+  rpc InsertAccount(AccountInsertReq)returns (AccountInsertRes){};
+  rpc UpdateAccount(AccountUpdateReq)returns (AccountUpdateRes){};
+  rpc DeleteAccount(AccountDeleteReq)returns (AccountDeleteRes){};
+  rpc QueryAccount(AccountQueryReq)returns (AccountQueryRes){};
+  rpc ListAllAccount(ListAllAccountReq)returns (ListAllAccountRes){}; //list all account
+}
+
+
+// 文档中出现ID 的地方, 末尾为ID 的是IMCore 数据库中的ID UUID
+// 变量后缀为UID 的是根据业务分配到的ID， 比如一个账号 hello@gmail.com 的facebook账号。 他的fbid 为16000111111 这个数就是AccountUID
+// 文档中不再出现OwnerID 关键词
+
+message MessageAcknowledge{
+  int64 Stamp = 1;
+  string Message = 2; // hint text for human read
+}
+enum IMCoreStatus{
+  StatusSucc = 0;
+  AccountNotFound = 1;
+  AccountBan = 2;
+  AccountLogOut = 3;
+  Failed = 4;
+  FriendAccountBan = 5;
+  AccountAuthFailed = 6;
+  AccountConnError = 7;
+
+  FriendNotFound = 101;
+
+  SendMessageTimeOut = 201;
+  SendMessageNativeExist = 202;
+
+  AccountInLoginQueue = 301;
+
+  ArgumentCheckFailed = 1001;
+  ServiceInternalError = 1501;  
+  // db error 
+  DataBaseError = 2001;
+}
+
+enum AccountType{
+  AccountTypeMessenger  = 0; // messenger account
+  AccountTypeLine       = 1; // line account
+  AccountTypeWhatsapp = 2;
+  AccountTypeZalo = 3;
+}
+
+message IMAccount{
+  AccountType IMType = 1;
+  string AccountID = 2; // account main field
+  string UserName = 3;  // username = loginname@business   username is unique key
+  string Password = 4;
+  bytes ExtendInfo = 5;
+  string AccountUID = 6;
+  string BOT = 7;
+}
+// insert account
+message AccountInsertReq{
+  IMAccount Account = 1;
+}
+message AccountInsertRes{
+  IMCoreStatus Status = 1;
+  MessageAcknowledge Ack = 2;
+  string AccountID = 3;
+}
+// update account 
+message AccountUpdateReq{
+  IMAccount Account = 1;
+  bool UpdatePassword = 2;
+  bool UpdateJSONData = 3;
+  bool UpdateAccountUID = 4;
+  bool UpdateBOT = 5;
+}
+message AccountUpdateRes{
+  IMCoreStatus Status = 1;
+  MessageAcknowledge Ack = 2;
+}
+// delete account
+message AccountDeleteReq{
+  string AccountID = 1;
+}
+message AccountDeleteRes{
+  IMCoreStatus Status = 1;
+  MessageAcknowledge Ack = 2;
+
+}
+// query account
+message AccountQueryReq{
+  string AccountID = 1;
+}
+message AccountQueryRes{
+  IMCoreStatus Status = 1;
+  MessageAcknowledge Ack = 2;
+  IMAccount Account = 3;  
+}
+
+// account login
+message AccountLoginReq{
+  string AccountID = 1;
+}
+message AccountLoginRes{
+  IMCoreStatus Status = 1;
+  MessageAcknowledge Ack = 2;
+}
+
+// account logout 
+message AccountLogoutReq{
+  string AccountID = 1;
+}
+message AccountLogoutRes{
+  IMCoreStatus Status = 1;
+  MessageAcknowledge Ack = 2;
+}
+// list account
+message ListAllAccountReq{
+  string ReqHi = 1;
+}
+message ListAllAccountRes{
+  IMCoreStatus Status = 1;
+  MessageAcknowledge Ack = 2;
+  repeated IMAccount Accounts = 3;
+}
+// list this bot wroking account
+message QueryBotWorkingAccountReq{
+  string ReqHi = 1; // no use
+}
+message QueryBotWorkingAccountRes{
+  IMCoreStatus Status = 1;
+  MessageAcknowledge Ack = 2;
+  repeated IMAccount Accounts = 3;
+}
